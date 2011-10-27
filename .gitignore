@@ -1,0 +1,13 @@
+pom.xml
+*jar
+/lib/
+/classes/
+.lein-failures
+.lein-deps-sum
+/target/
+derby.log
+.lein-failures
+*~
+*#*#
+.#*
+
