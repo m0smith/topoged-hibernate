@@ -10,11 +10,10 @@
 
 (deftest basic-hibernate []
 	 (with-hibernate-tx [session   tx  ]
-	   (do
 	     (.save session "Event" (wrap {:title "Our very first event!"
 					   :date (java.util.Date.)}))
 	     (.save session "Event" (wrap {:title "A follow-up event"
-					   :date (java.util.Date.)}))))
+					   :date (java.util.Date.)})))
 	 (with-hibernate-tx [session _]
 	   (let [rows (.. session (createQuery "from Event") list)]
 	     (is (= 2 (count rows)))

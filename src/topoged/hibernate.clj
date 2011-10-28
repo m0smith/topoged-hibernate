@@ -43,7 +43,7 @@ regardless of any exceptions"
 	   ~(with-meta session {:tag 'org.hibernate.Session}) (first ~src) 
 	   ~(with-meta tx {:tag 'org.hibernate.Transaction}) (second ~src)]
        (try
-	 (let [~rtnval  ~@body]
+	 (let [~rtnval  (do ~@body)]
 	   (. ~session flush)
 	   (. ~tx commit)
 	   ~rtnval)
