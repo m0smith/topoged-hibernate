@@ -1,14 +1,21 @@
 (ns topoged.hibernate
+  (:import
+   	   [java.io FileReader]
+	   [java.util Properties]
+	   [org.hibernate EntityMode Session Transaction]
+	   [org.hibernate.cfg AnnotationConfiguration Configuration ]
+	   [org.hibernate.impl SessionFactoryImpl]
+	   )
   (:use [org.satta.glob :only (glob)])
   (:use [clojure.tools.logging :only (info error )]))
 
 
 (defn hibernate-properties-config
   ([prop-file & hbm-globs]
-      (let [props (doto (java.util.Properties.)
-		    (.load (java.io.FileReader. prop-file))
+      (let [props (doto (Properties.)
+		    (.load (FileReader. prop-file))
 		    )
-	    cfg (doto (org.hibernate.cfg.AnnotationConfiguration.)
+	    cfg (doto (AnnotationConfiguration.)
 		  (.addProperties props)
 		  )]
 	(doseq [hbm-glob hbm-globs]
@@ -17,18 +24,20 @@
 	      ( .addFile cfg p))))
 	cfg)))
 
-(defn init [cfg-fn]
-  (let [hsf (memoize #(.buildSessionFactory ( cfg-fn)))]
-    (letfn [( begin-tx-local
-	      []
-	      (try
-		(let [^org.hibernate.impl.SessionFactoryImpl sf (hsf)
-		      session (.. sf openSession (getSession org.hibernate.EntityMode/MAP))
-		      tx (. session beginTransaction)]
-		  [session tx])
-		(catch Exception ex
-		  (error ex "Failed to start transaction"))))]
-      (intern 'topoged.hibernate 'begin-tx begin-tx-local))))
+(defn init
+  "Initialize the hibernate session factory"
+  ([] (init #(.configure (Configuration.))))
+  ([cfg-fn]
+     (let [hsf (memoize #(.buildSessionFactory ( cfg-fn)))]
+       (letfn [( begin-tx-local []
+		 (try
+		   (let [^SessionFactoryImpl sf (hsf)
+			 session (.. sf openSession (getSession EntityMode/MAP))
+			 tx (. session beginTransaction)]
+		     [session tx])
+		   (catch Exception ex
+		     (error ex "Failed to start transaction"))))]
+	 (intern 'topoged.hibernate 'begin-tx begin-tx-local)))))
 
 (defmacro with-hibernate-tx
   "Execute body in the context of a hibernate trasnascton.
@@ -47,12 +56,12 @@ regardless of any exceptions"
 	   (. ~session flush)
 	   (. ~tx commit)
 	   ~rtnval)
-	 (catch java.lang.Exception ~ex
+	 (catch Exception ~ex
 	   (try
 	     (if (and ~tx (.isActive ~tx))
 	       (.rollback ~tx))
 	     (finally
-	      	(error ~ex "Rollback failed")
+	      	(error ~ex "Rollback transaction")
 		(throw ~ex))))
 	 (finally
 	  (if (and ~session (. ~session isOpen))
