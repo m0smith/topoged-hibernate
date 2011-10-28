@@ -4,7 +4,9 @@
 
 (init #(.configure (org.hibernate.cfg.Configuration.)))
 
-(defn wrap [m]
+(defn wrap
+  "Convert keywords to strings and make the map a HashMap"
+  [m]
   (let [newmap (reduce conj m (map (fn [[k v]] [(name k) v]) m))]
     (java.util.HashMap. newmap)))
 
@@ -18,6 +20,12 @@
 	   (let [rows (.. session (createQuery "from Event") list)]
 	     (is (= 2 (count rows)))
 	     (println rows))))
+
+(deftest lazy-results []
+	 (println 
+	  (with-hibernate-tx [session _]
+	    (let [rows (.. session (createQuery "from Event") list)]
+	      rows))))
 
 
 
