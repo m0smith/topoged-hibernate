@@ -1,7 +1,7 @@
 (ns basic
   (:import [java.util Date])
   (:use [clojure.test :only [deftest is use-fixtures]])
-  (:use [topoged.hibernate :only [with-hibernate-tx init]]))
+  (:use [topoged.hibernate :only [with-hibernate-tx hibernate]]))
 
 
 (defn to-entity
@@ -11,7 +11,7 @@
     (java.util.HashMap. newmap)))
 
 (defn populate-tables [f]
-  (init)
+  (hibernate)
   (with-hibernate-tx [session tx]
     (.save session "Event" (to-entity {:title "Our very first event!"
 				       :date (Date.)}))
