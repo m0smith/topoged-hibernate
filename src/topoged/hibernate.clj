@@ -31,10 +31,11 @@
 	    cfg (doto (AnnotationConfiguration.)
 		  (.addProperties props)
 		  )]
-	(for [hbm-glob hbm-globs
-	      file (glob hbm-glob)]
-	  (let [p (.getAbsolutePath file)]
-	    ( .addFile cfg p)))
+	(doseq [hbm-glob hbm-globs]
+	  (doseq  [file (glob hbm-glob)]
+	    (let [p (.getAbsolutePath file)]
+	      (println "Adding file:" p)
+	      ( .addFile cfg p))))
 	cfg)))
 
 (defn begin-tx []

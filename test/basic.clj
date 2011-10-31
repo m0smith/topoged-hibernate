@@ -1,7 +1,7 @@
 (ns basic
   (:import [java.util Date])
   (:use [clojure.test :only [deftest is use-fixtures]])
-  (:use [topoged.hibernate :only [with-hibernate-tx hibernate]]))
+  (:use [topoged.hibernate :only [with-hibernate-tx hibernate create-session-factory hibernate-properties-config *hibernate-session-factory*]]))
 
 
 (defn to-entity
@@ -28,6 +28,17 @@
 	 (let [events (with-hibernate-tx [session _] (.. session (createQuery "from Event") list))]
 	   (is (= 2 (count events)))))
 
+(deftest binding-test[]
+	 (let [hsf (create-session-factory #(hibernate-properties-config
+					     "test/hibernate-test.properties"
+					     "test/Type.hbm.xml"))]
+	   (binding [*hibernate-session-factory* hsf]
+	     (with-hibernate-tx[session _]
+	       (.save session "Type" (to-entity {:id (byte-array 1)
+						 :name "Type1"
+						 :desc "The first type"}))
+	       (is (= "Type1"(:name (.get session "Type" (byte-array 1)))))))))
+	     
 
 (deftest basic-hibernate []
 	 (populate-tables #())
@@ -37,7 +48,8 @@
 (use-fixtures :once populate-tables)
 
 (defn test-ns-hook []
-  (basic-hibernate))
+  (basic-hibernate)
+  (binding-test))
 
 
 
