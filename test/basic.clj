@@ -34,10 +34,13 @@
 					     "test/Type.hbm.xml"))]
 	   (binding [*hibernate-session-factory* hsf]
 	     (with-hibernate-tx[session _]
-	       (.save session "Type" (to-entity {:id (byte-array 1)
+	       (.save session "Type" (to-entity {:id  1
 						 :name "Type1"
-						 :desc "The first type"}))
-	       (is (= "Type1"(:name (.get session "Type" (byte-array 1)))))))))
+						 :desc "The first type"})))
+	     (with-hibernate-tx [session _]
+	       (let [type (merge {} (.get session "Type"  1))]
+		 (println type)
+		 (is (= "Type1"(type "name"))))))))
 	     
 
 (deftest basic-hibernate []

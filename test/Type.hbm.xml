@@ -4,18 +4,18 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
   	<class entity-name="Type" table="TYPE">
-  	  	<id column="TYPE_ID" name="id" type="binary" length="16">
+  	  	<id column="TYPE_ID" name="id" type="long" length="16">
                         <generator class="assigned"/>
   	  	</id>
   	  	<property column="TYPE_NAME" name="name" type="java.lang.String"/>
   	  	<property column="TYPE_DESC" name="desc" type="java.lang.String"/>
   	</class>
   	<class entity-name="TypeGroup" table="TYPE_GROUP">
-  	  	<id column="TYPE_GROUP_ID" name="id" type="binary" length="16">
+  	  	<id column="TYPE_GROUP_ID" name="id" type="long" length="16">
                         <generator class="assigned"/>
   	  	</id>
-  	  	<property column="GROUP_TYPE_ID" name="group_type" type="binary" length="16"/>
-  	  	<property column="RELATIONSHIP_TYPE_ID" name="rel_type" type="binary" length="16"/>
+  	  	<property column="GROUP_TYPE_ID" name="group_type" type="long" length="16"/>
+  	  	<property column="RELATIONSHIP_TYPE_ID" name="rel_type" type="long" length="16"/>
 		<set name="type_group_members" table="TYPE_GROUP_MEMBER" lazy="false">
 		  <key column="TYPE_GROUP_ID" />
 		  <many-to-many column="TYPE_ID" unique="false" entity-name="Type"/>
