@@ -51,9 +51,10 @@
         <!-- Drop and re-create the database schema on startup -->
         <property name="hbm2ddl.auto">create</property>
 
-	<property name="hibernate.default_entity_mode">dynamic-map</property>
+		<property name="hibernate.default_entity_mode">dynamic-map</property>
 
         <mapping resource="org/hibernate/tutorial/hbm/Event.hbm.xml"/>
+        <mapping resource="org/hibernate/tutorial/hbm/Person.hbm.xml"/>
 
     </session-factory>
 

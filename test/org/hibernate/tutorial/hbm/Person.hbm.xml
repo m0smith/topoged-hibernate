@@ -1,0 +1,20 @@
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.hibernate.tutorial.domain">
+
+    <class entity-name="Person" table="PERSON">
+        <id name="id" column="PERSON_ID" type="long">
+            <generator class="increment"/>
+        </id>
+        <property type="long" name="age"/>
+        <property type="string" name="firstname"/>
+        <property type="string" name="lastname"/>
+		<set name="events" table="PERSON_EVENT">
+		  <key column="PERSON_ID"/>
+		  <many-to-many column="EVENT_ID" entity-name="Event"/>
+		</set>
+    </class>
+
+</hibernate-mapping>

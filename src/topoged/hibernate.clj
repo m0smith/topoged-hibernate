@@ -12,6 +12,24 @@
 
 (def ^:dynamic *hibernate-session-factory* "" (atom nil))
 
+(defn entity-map
+  "Convert keywords to strings and make the map a HashMap"
+  [m]
+  (let [newmap (reduce conj m (map (fn [[k v]] [(name k) v]) m))]
+;;	newmap
+	
+	(java.util.HashMap. newmap)))
+
+(defmacro add-entity-factory
+  "A macro that creates a function that will add a record of the given entity"
+  [name & columns] 
+  `(fn [~@columns] 
+     (let [entity-name# ~name
+		   data# ~(into {} (map (fn [f] {(str f) f}) columns))]
+       (with-session [session# tx#]
+		 (.save session# entity-name# (java.util.HashMap. data#))))))
+
+
 (defprotocol RefVal
   ""
   (refval [src] ""))
@@ -53,7 +71,8 @@
   org.hibernate.cfg.Configuration instance.  The result is memoized so
   it only gets called once."
   [cfg-fn]
-  (memoize #(.buildSessionFactory (cfg-fn))))
+  (let [cfg (cfg-fn)]
+    (memoize #(.buildSessionFactory cfg))))
   
 (defn hibernate
   "Initialize the hibernate session factory using the default
@@ -62,7 +81,7 @@ hiberante configuration.  Also sets the *hibernate-session-factory*."
   ([cfg-fn]
      (swap! *hibernate-session-factory* (constantly (create-session-factory cfg-fn)))))
 
-(defmacro with-hibernate-tx
+(defmacro with-session
   "Execute body in the context of a hibernate trasnascton.
  The session and tx parameters are set with the hibernate session and
 a transaction.  The transaction is commited unless an Exception is
@@ -70,7 +89,7 @@ thrown in body.  If there is an unhandled exception thrown in body,
 the transaction will be rolled back.  The session is also closed
 regardless of any exceptions"
   [[session tx] & body]
-  (let [src (gensym "src") rtnval (gensym "rtnval") ex (gensym "ex")]
+	 (let [src (gensym "src") rtnval (gensym "rtnval") ex (gensym "ex")]
     `(let [~src (begin-tx)
 	   ~(with-meta session {:tag 'org.hibernate.Session}) (first ~src) 
 	   ~(with-meta tx {:tag 'org.hibernate.Transaction}) (second ~src)]
