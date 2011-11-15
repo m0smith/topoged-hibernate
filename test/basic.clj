@@ -18,18 +18,16 @@
 							 (.put "date" (Date.))))
 	; Use a clojure map
 	(.save session "Event" (entity-map {:title "A follow-up event"
-										:date (Date.)}))
-	; Use an entity factory
-	(let [add-event (add-entity-factory "Event" title date)
-		  add-person (add-entity-factory "Person" firstname lastname)]
-
-	  (add-event "Added with entity factory" (Date.))
-	  (add-person "Foo" "Bar")
-	  
-	  )
-	)
+										:date (Date.)})))
+  ; Use an entity factory
+  (let [add-event (add-entity-factory "Event" title date)
+		add-person (add-entity-factory "Person" firstname lastname)]
+	
+	(add-event "Added with entity factory" (Date.))
+	(add-person "Foo" "Bar"))
   
   (f))
+
 (deftest add-event-to-person-set []
 		 (with-session [session _]
 		   (let [
@@ -38,6 +36,20 @@
 			 (doto (. person (get "events")) (.add event))))
 		 (with-session [session _]
 		   (is (= 1 (count (.. session (load "Person" 1) (get "events" )))))))
+
+(deftest add-email-to-person-set []
+		 (with-session [session _]
+		   (let [
+				 person (.load session "Person" 1)
+				 email "topoged@topoged.com"]
+			 (doto (. person (get "emailAddresses")) (.add email))))
+		 (with-session [session _]
+		   (let [p (. session (load "Person" 1))
+				 emails (. p (get "emailAddresses" ))]
+			 (is (= 1 (count emails)))
+			 (println (reduce merge {} p))
+			 (println (class emails)))))
+
 
 (deftest list-in-tx []
 	 (with-session [session _]
@@ -68,6 +80,7 @@
 		 (list-in-tx)
 		 (list-as-seq)
 		 (add-event-to-person-set)
+		 (add-email-to-person-set)
 		 )
 
 (use-fixtures :once populate-tables)
