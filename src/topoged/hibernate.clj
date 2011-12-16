@@ -14,14 +14,13 @@
 
 (defn entity-map
   "Convert keywords to strings and make the map a HashMap"
-  [m]
-  (let [newmap (reduce conj m (map (fn [[k v]] [(name k) v]) m))]
-;;	newmap
-	
+  [& m]
+  (let [maps (apply merge {} m)
+	newmap (reduce conj maps (map (fn [[k v]] [(name k) v]) (apply concat m)))]
 	(java.util.HashMap. newmap)))
 
 (defmacro add-entity-factory
-  "A macro that creates a function that will add a record of the given entity"
+  "A macro that creates a function that will add a record of the given entity.  The return for the generated function is the generated identifier."
   [name & columns] 
   `(fn [~@columns] 
      (let [entity-name# ~name
