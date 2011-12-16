@@ -13,6 +13,25 @@ of this project are:
 
 ## Usage
 
+The following simple example shows how to save a record in to a table.
+
+    (hibernate)
+	(with-session [session tx]
+	    (.save session "Event" (entity-map 
+            {:title "A follow-up event"  :date (Date.)}))
+
+The `(hibernate)` call initializes Hibernate using the standard
+hibernate initialization.
+
+`with-session` is a macro that gets a session and a transaction and execeutes the body of within the transaction, closing the transaction at the end.
+
+## Caveats
+
+This has only been tested with the dynamic-map entities in hibernate.
+
+There is a mismatch between hibernate maps and clojure maps which
+means that there is some translating between them.  Hopefully, this
+will be smoothed over in the future
 
 
 ## License
