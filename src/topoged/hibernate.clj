@@ -21,12 +21,13 @@
 
 (defmacro add-entity-factory
   "A macro that creates a function that will add a record of the given entity.  The return for the generated function is the generated identifier."
-  [name & columns] 
-  `(fn [~@columns] 
-     (let [entity-name# ~name
-		   data# ~(into {} (map (fn [f] {(str f) f}) columns))]
-       (with-session [session# tx#]
-		 (.save session# entity-name# (java.util.HashMap. data#))))))
+  [name & columns]
+  (let [data (gensym "data")]
+    `(fn [~@columns] 
+       (let [entity-name# ~name
+	     ~(with-meta data {:tag 'java.util.Map}) ~(into {} (map (fn [f] {(str f) f}) columns))]
+	 (with-session [session# tx#]
+	   (.save session# entity-name# (java.util.HashMap. ~data)))))))
 
 
 (defprotocol RefVal
